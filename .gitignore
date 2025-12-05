@@ -1,0 +1,12 @@
+*DS_Store
+
+# env
+.env
+.venv
+.env
+.venv/
+
+# folders
+data/
+.claude/
+*__pycache__/

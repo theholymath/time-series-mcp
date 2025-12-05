@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "time-series-mcp": {
+      "command": "/Users/ryanhaptiq/products/time-series-mcp/.venv/bin/python",
+      "args": ["-m", "time_series_mcp.server"],
+      "env": {}
+    }
+  }
+}
