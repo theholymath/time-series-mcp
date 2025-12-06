@@ -24,7 +24,7 @@ pip install time-series-mcp
 ```bash
 git clone https://github.com/yourusername/time-series-mcp.git
 cd time-series-mcp
-pip install -e .
+uv sync
 ```
 
 ## Configuration
@@ -53,12 +53,19 @@ Add to your Claude Desktop config file:
 {
   "mcpServers": {
     "time-series-mcp": {
-      "command": "python",
-      "args": ["-m", "time_series_mcp"]
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/absolute/path/to/time-series-mcp",
+        "run",
+        "time-series-mcp"
+      ]
     }
   }
 }
 ```
+
+Replace `/absolute/path/to/time-series-mcp` with your actual project path (use `pwd` to get it).
 
 **Restart Claude Desktop** after updating the config.
 
@@ -105,13 +112,13 @@ git clone https://github.com/yourusername/time-series-mcp.git
 cd time-series-mcp
 
 # Install dependencies
-pip install -e ".[dev]"
+uv sync
 
 # Run tests
-pytest
+uv run pytest
 
 # Run the server directly
-python -m time_series_mcp
+uv run time-series-mcp
 ```
 
 ## Publishing to PyPI

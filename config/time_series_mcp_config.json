@@ -10,8 +10,13 @@
   "_comment3": "For development (when installed from source):",
   "development": {
     "time-series-mcp": {
-      "command": "python",
-      "args": ["-m", "time_series_mcp"]
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/absolute/path/to/time-series-mcp",
+        "run",
+        "time-series-mcp"
+      ]
     }
   }
 }
