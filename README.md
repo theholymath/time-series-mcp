@@ -22,34 +22,152 @@ A Model Context Protocol (MCP) server for intelligent time series analysis and f
 
 ## Installation
 
+### Prerequisites
+
+- Python 3.11 or higher
+- `uv` package manager (recommended) or `pip`
+
+### Step 1: Install uv (Recommended)
+
+If you don't have `uv` installed:
+
+```bash
+# macOS/Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Windows
+powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# Or with pip
+pip install uv
+```
+
+### Step 2: Clone and Setup
+
 ```bash
 # Clone the repository
 git clone https://github.com/yourusername/time-series-mcp.git
 cd time-series-mcp
 
-# Install with pip
+# Install dependencies with uv (recommended)
+uv sync
+
+# OR install with pip
 pip install -e .
-
-# Or with uv
-uv pip install -e .
 ```
 
-## Quick Start
+## Configuration
 
-### Configure with Claude Desktop
+### Method 1: Using uv (Recommended)
 
-Add to your Claude Desktop config (`~/Library/Application Support/Claude/claude_desktop_config.json`):
+This is the most reliable method as it uses `uv` to manage the Python environment automatically.
 
-```json
-{
-  "mcpServers": {
-    "time-series-mcp": {
-      "command": "python",
-      "args": ["-m", "time_series_mcp.server"]
-    }
-  }
-}
-```
+1. **Find your absolute path to the project:**
+   ```bash
+   pwd
+   ```
+   This will output something like `/Users/yourname/projects/time-series-mcp`
+
+2. **Copy the sample config:**
+   ```bash
+   cp .mcp.json.sample .mcp.json
+   ```
+
+3. **Edit `.mcp.json`** and replace `/ABSOLUTE/PATH/TO/time-series-mcp` with your actual project path:
+   ```json
+   {
+     "mcpServers": {
+       "time-series-mcp": {
+         "command": "uv",
+         "args": [
+           "--directory",
+           "/Users/yourname/projects/time-series-mcp",
+           "run",
+           "time-series-mcp"
+         ],
+         "env": {
+           "LOG_LEVEL": "INFO"
+         }
+       }
+     }
+   }
+   ```
+
+4. **Add to Claude Desktop config** (`~/Library/Application Support/Claude/claude_desktop_config.json` on macOS or `%APPDATA%\Claude\claude_desktop_config.json` on Windows):
+
+   Copy the contents of your edited `.mcp.json` file into your Claude Desktop config.
+
+### Method 2: Using pip install with system Python
+
+If you installed with `pip install -e .` and the package is globally available:
+
+1. **Copy the pip sample config:**
+   ```bash
+   cp .mcp.json.pip.sample .mcp.json
+   ```
+
+2. **Add to Claude Desktop config:**
+   ```json
+   {
+     "mcpServers": {
+       "time-series-mcp": {
+         "command": "python",
+         "args": ["-m", "time_series_mcp.server"],
+         "env": {}
+       }
+     }
+   }
+   ```
+
+   **Note:** This requires `time-series-mcp` to be installed in your system Python or active virtual environment.
+
+### Method 3: Using a specific virtual environment
+
+If you prefer to use a specific virtual environment:
+
+1. **Create and activate a virtual environment:**
+   ```bash
+   python -m venv .venv
+   source .venv/bin/activate  # On Windows: .venv\Scripts\activate
+   pip install -e .
+   ```
+
+2. **Find the absolute path to your venv Python:**
+   ```bash
+   which python  # On macOS/Linux
+   where python  # On Windows
+   ```
+   This will output something like `/Users/yourname/projects/time-series-mcp/.venv/bin/python`
+
+3. **Copy the venv sample config:**
+   ```bash
+   cp .mcp.json.venv.sample .mcp.json
+   ```
+
+4. **Edit `.mcp.json`** and replace the path:
+   ```json
+   {
+     "mcpServers": {
+       "time-series-mcp": {
+         "command": "/Users/yourname/projects/time-series-mcp/.venv/bin/python",
+         "args": ["-m", "time_series_mcp.server"],
+         "env": {}
+       }
+     }
+   }
+   ```
+
+5. **Add to Claude Desktop config** using the contents of your edited `.mcp.json`.
+
+## Verification
+
+After configuring, restart Claude Desktop and verify the MCP server is working:
+
+1. Open Claude Desktop
+2. Look for a small tool/hammer icon in the input area (indicates MCP tools are available)
+3. Try asking Claude: "List the available time series datasets"
+
+If you see MCP tools available, you're all set!
 
 ### Example Usage
 

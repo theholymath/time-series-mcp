@@ -1,7 +1,4 @@
 {
-  "_comment": "This is a REFERENCE CONFIG only. Do NOT use this directly.",
-  "_comment2": "Copy one of the .mcp.json.*sample files from the project root and customize it.",
-  "_comment3": "See README.md for detailed configuration instructions.",
   "mcpServers": {
     "time-series-mcp": {
       "command": "uv",
