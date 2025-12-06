@@ -858,10 +858,28 @@ async def handle_load_dataset(arguments: dict) -> list[TextContent]:
         frequency=arguments.get("frequency", "auto"),
         sample_size=arguments.get("sample_size")
     )
-    
+
     if result["status"] == "error":
         return [TextContent(type="text", text=f"❌ {result['message']}")]
-    
+
+    # --- CREATE DATA RESOURCE ---
+    # Register the loaded dataset as a resource so it can be accessed via ts://data/{name}
+    dataset_name = result['dataset_name']
+    df = DatasetManager.get_dataset(dataset_name)
+
+    if df is not None:
+        resource = resource_manager.create_data_resource(
+            name=dataset_name,
+            data=df,
+            description=f"Loaded time series dataset: {dataset_name}",
+            data_type="csv",
+            dataset_name=dataset_name,
+            auto_save=True
+        )
+        resource_uri = resource.uri
+    else:
+        resource_uri = None
+
     summary = f"""
 ## ✅ Dataset Loaded: `{result['dataset_name']}`
 
@@ -874,16 +892,24 @@ async def handle_load_dataset(arguments: dict) -> list[TextContent]:
 | **Date Range** | {result['date_range']} |
 | **Missing Values** | {result['missing_values']} ({result['missing_pct']:.1f}%) |
 | **Outliers** | {result['outliers']} |
+"""
 
+    if resource_uri:
+        summary += f"| **Resource URI** | `{resource_uri}` |\n"
+
+    summary += f"""
 ### Preview
 {result['preview']}
 
 
 """
-    
+
     if result.get("sampled"):
         summary += f"\n⚠️ **Sampled** from {result['original_rows']} to {result['rows']} rows"
-    
+
+    if resource_uri:
+        summary += f"\n\n💡 **Tip:** You can now access this dataset via the resource `{resource_uri}` or use it in forecasting tools."
+
     return [TextContent(type="text", text=summary)]
 
 
@@ -898,10 +924,28 @@ async def handle_load_dataset_from_content(arguments: dict) -> list[TextContent]
         frequency=arguments.get("frequency", "auto"),
         sample_size=arguments.get("sample_size")
     )
-    
+
     if result["status"] == "error":
         return [TextContent(type="text", text=f"❌ {result['message']}")]
-    
+
+    # --- CREATE DATA RESOURCE ---
+    # Register the loaded dataset as a resource so it can be accessed via ts://data/{name}
+    dataset_name = result['dataset_name']
+    df = DatasetManager.get_dataset(dataset_name)
+
+    if df is not None:
+        resource = resource_manager.create_data_resource(
+            name=dataset_name,
+            data=df,
+            description=f"Loaded time series dataset from content: {dataset_name}",
+            data_type="csv",
+            dataset_name=dataset_name,
+            auto_save=True
+        )
+        resource_uri = resource.uri
+    else:
+        resource_uri = None
+
     summary = f"""
 ## ✅ Dataset Loaded from Content: `{result['dataset_name']}`
 
@@ -913,15 +957,23 @@ async def handle_load_dataset_from_content(arguments: dict) -> list[TextContent]
 | **Frequency** | {result['frequency']} |
 | **Date Range** | {result['date_range']} |
 | **Missing Values** | {result['missing_values']} ({result['missing_pct']:.1f}%) |
+"""
 
+    if resource_uri:
+        summary += f"| **Resource URI** | `{resource_uri}` |\n"
+
+    summary += f"""
 ### Preview
 {result['preview']}
 
 
-
-**Ready for analysis!** Use `analyze_time_series` or `create_forecast`.
 """
-    
+
+    if resource_uri:
+        summary += f"\n💡 **Tip:** You can now access this dataset via the resource `{resource_uri}`.\n"
+
+    summary += "\n**Ready for analysis!** Use `analyze_time_series` or `create_forecast`."
+
     return [TextContent(type="text", text=summary)]
 
 
@@ -1182,9 +1234,25 @@ async def handle_create_forecast(arguments: dict) -> list[TextContent | ImageCon
             periods=periods,
             frequency=frequency
         )
-    
+
+    # --- CREATE FORECAST DATA RESOURCE ---
+    # Register the best forecast as a resource so it can be accessed via ts://data/{name}_forecast
+    best_model = result["best_model"]
+    best_forecast_df = result["forecasts"][best_model]
+    forecast_resource_name = f"{dataset_name}_forecast_{best_model}"
+
+    forecast_resource = resource_manager.create_data_resource(
+        name=forecast_resource_name,
+        data=best_forecast_df,
+        description=f"Forecast results for {dataset_name} using {best_model} model",
+        data_type="csv",
+        dataset_name=dataset_name,
+        auto_save=True
+    )
+    forecast_resource_uri = forecast_resource.uri
+
     result_parts = []
-    
+
     summary = f"""
 ## 🔮 Forecast Generated: `{dataset_name}`
 
@@ -1200,6 +1268,8 @@ async def handle_create_forecast(arguments: dict) -> list[TextContent | ImageCon
     summary += f"""
 ### Best Model: **{result['best_model']}**
 
+**Forecast Resource:** `{forecast_resource_uri}`
+
 ### Forecast Preview ({periods} periods)
 {result['forecasts'][result['best_model']].head(15).to_string()}
 
@@ -1207,10 +1277,12 @@ async def handle_create_forecast(arguments: dict) -> list[TextContent | ImageCon
 
 ### Insights
 """
-    
+
     for insight in result["insights"]:
         summary += f"- {insight}\n"
-    
+
+    summary += f"\n\n💡 **Tip:** Access the full forecast data via resource `{forecast_resource_uri}`"
+
     result_parts.append(TextContent(type="text", text=summary))
     
     # Add forecast plot
