@@ -1,9 +1,0 @@
-{
-  "mcpServers": {
-    "time-series-mcp": {
-      "command": "python",
-      "args": ["-m", "time_series_mcp.server"],
-      "env": {}
-    }
-  }
-}

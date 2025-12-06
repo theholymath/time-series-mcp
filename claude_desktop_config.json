@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "time-series-mcp": {
+      "command": "uvx",
+      "args": ["time-series-mcp"]
+    }
+  }
+}

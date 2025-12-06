@@ -1,9 +1,0 @@
-{
-  "mcpServers": {
-    "time-series-mcp": {
-      "command": "/ABSOLUTE/PATH/TO/time-series-mcp/.venv/bin/python",
-      "args": ["-m", "time_series_mcp.server"],
-      "env": {}
-    }
-  }
-}

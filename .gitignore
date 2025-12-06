@@ -2,14 +2,17 @@
 
 # env
 .env
-.venv
-.env
 .venv/
 
-# MCP config (user-specific)
-.mcp.json
+# Python
+*__pycache__/
+*.pyc
+*.pyo
+*.egg-info/
+dist/
+build/
 
 # folders
 data/
 .claude/
-*__pycache__/
+forecast_output/
