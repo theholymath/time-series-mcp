@@ -15,7 +15,7 @@ async def main():
     load_dotenv()
 
     # Load MCP server config
-    config_path = "config/time_series_mcp_config.json"
+    config_path = "../../config/time_series_mcp_config.json"
     with open(config_path, 'r') as f:
         config = json.load(f)
 

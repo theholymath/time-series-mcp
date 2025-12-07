@@ -1,22 +1,10 @@
 {
-  "_comment": "REFERENCE: Configuration for claude_desktop_config.json",
-  "_comment2": "For production (once published to PyPI):",
-  "production": {
-    "time-series-mcp": {
-      "command": "uvx",
-      "args": ["time-series-mcp"]
-    }
-  },
-  "_comment3": "For development (when installed from source):",
-  "development": {
-    "time-series-mcp": {
-      "command": "uv",
-      "args": [
-        "--directory",
-        "/absolute/path/to/time-series-mcp",
-        "run",
-        "time-series-mcp"
-      ]
-    }
-  }
+  "name": "time-series-mcp",
+  "command": "uv",
+  "args": [
+    "--directory",
+    "/home/user/time-series-mcp",
+    "run",
+    "time-series-mcp"
+  ]
 }

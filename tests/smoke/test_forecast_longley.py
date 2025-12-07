@@ -43,8 +43,8 @@ def prepare_longley_dataset():
     df['YEAR'] = range(1947, 1947 + len(df))
 
     # Save to CSV for the MCP server
-    output_path = Path("data/longley_employment.csv")
-    output_path.parent.mkdir(exist_ok=True)
+    output_path = Path("../../data/longley_employment.csv")
+    output_path.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(output_path, index=False)
 
     print(f"\n💾 Saved dataset to: {output_path}")
@@ -71,7 +71,7 @@ async def test_longley_forecast():
     dataset_path = prepare_longley_dataset()
 
     # Load MCP server config
-    config_path = "config/time_series_mcp_config.json"
+    config_path = "../../config/time_series_mcp_config.json"
     with open(config_path, 'r') as f:
         config = json.load(f)
 

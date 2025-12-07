@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 """
-Test time series forecasting using the statsmodels Longley dataset.
-This dataset contains US macroeconomic data from 1947-1962.
+Test time series forecasting using the Uber & Lyft cab ride dataset.
+This dataset contains ride price data from Boston in November 2018.
 """
 import os
 import json
@@ -34,18 +34,26 @@ Weather data contains weather attributes like temperature, rain, cloud, etc for 
 Inspiration
 Our aim was to try to analyze the prices of these ride-sharing apps and try to figure out what factors are driving the demand. Do Mondays have more demand than Sunday at 9 am? Do people avoid cabs on a sunny day? Was there a Red Sox match at Fenway that caused more people coming in? We have provided a small dataset as well as a mechanism to collect more data. We would love to see more conclusions drawn.
     """
-    print("📦 Loading Uber & Lyft dataset ...")
+    print("📦 Checking Uber & Lyft dataset ...")
 
-    # Load the dataset
-    df_path = "../../data/cab_weather/cab_rides.csv"
+    # Define the dataset path
+    df_path = Path("../../data/cab_weather/cab_rides.csv")
+
+    # Check if the dataset exists
+    if not df_path.exists():
+        print(f"⚠️  Dataset not found at: {df_path}")
+        print("Please download the Uber & Lyft dataset and place it at the above path.")
+        print("Dataset source: https://www.kaggle.com/datasets/ravi72munde/uber-lyft-cab-prices")
+        return None
+
+    # Load the dataset to verify it
     df = pd.read_csv(df_path)
-
     print(f"   Dataset shape: {df.shape}")
     print(f"   Columns: {df.columns.tolist()}")
     print(f"\n📊 First few rows:")
     print(df.head())
 
-    return df
+    return str(df_path.absolute())
 
 
 async def test_cab_ride_demand_forecast():
@@ -63,6 +71,9 @@ async def test_cab_ride_demand_forecast():
 
     # Prepare the dataset
     dataset_path = prepare_lyft_uber_dataset()
+    if dataset_path is None:
+        print("❌ Test skipped: dataset not available")
+        return
 
     # Load MCP server config
     config_path = "../../config/time_series_mcp_config.json"
@@ -84,13 +95,14 @@ async def test_cab_ride_demand_forecast():
 
     # Construct the query - simplified to avoid context overflow
     query = f"""
-    I have a time series dataset at this path: data/cab_weather/cab_rides.csv
+    I have a time series dataset at this path: {dataset_path}
 
-    This is the Lyft & Uber car share dataset in NYC from August 2018. 
-    
+    This is the Uber & Lyft cab ride dataset from Boston in November 2018.
+    It contains ride prices and weather data collected every 5 minutes.
+
     Please:
-    1. Load the dataset (the date column is YEAR, and the target variable is TOTEMP - Total Employment)
-    2. Create a forecast for the next 5 years (1963-1967) using the annual frequency
+    1. Load the dataset and analyze it to determine the appropriate time and target columns
+    2. Create a forecast for cab ride demand or prices
     3. Show me the forecast values with confidence intervals
 
     Use the quick_forecast tool or create_forecast to keep it simple.
@@ -114,7 +126,7 @@ async def test_cab_ride_demand_forecast():
     print(result)
     print("="*70)
 
-    print("\n✅ Longley dataset forecast test complete!")
+    print("\n✅ Uber & Lyft cab ride forecast test complete!")
 
     # Check if any output files were created
     output_dir = Path("output")
@@ -127,8 +139,8 @@ async def test_cab_ride_demand_forecast():
 
 
 async def main():
-    """Run the Longley dataset forecast test."""
-    await test_longley_forecast()
+    """Run the Uber & Lyft cab ride demand forecast test."""
+    await test_cab_ride_demand_forecast()
 
 
 if __name__ == "__main__":
