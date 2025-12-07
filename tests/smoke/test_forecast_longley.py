@@ -84,6 +84,10 @@ async def test_longley_forecast():
     # Create MCPClient from the config
     client = MCPClient.from_dict(config)
 
+    # Verify API key
+    api_key = os.getenv("OPENAI_API_KEY")
+    print(f"🔑 Using API key: {api_key[:5]}...{api_key[-5:]}")
+
     # Create LLM - using gpt-4o for better performance
     llm = ChatOpenAI(model="gpt-4o", temperature=0)
 

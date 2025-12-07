@@ -32,6 +32,9 @@ async def main():
         print("Please set it in .env file to test with AI agent.")
         return
 
+    api_key = os.getenv("OPENAI_API_KEY")
+    print(f"🔑 Using API key: {api_key[:5]}...{api_key[-5:]}")
+
     llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
 
     # Create agent - this will connect to the MCP server
