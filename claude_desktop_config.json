@@ -1,0 +1,13 @@
+{
+  "mcpServers": {
+    "time-series-mcp": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/absolute/path/to/time-series-mcp",
+        "run",
+        "time-series-mcp"
+      ]
+    }
+  }
+}

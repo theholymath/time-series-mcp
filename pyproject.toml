@@ -4,9 +4,21 @@ version = "0.1.0"
 description = "MCP server for time series analysis and forecasting"
 readme = "README.md"
 requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+    {name = "Your Name", email = "your.email@example.com"}
+]
+keywords = ["mcp", "time-series", "forecasting", "claude", "ai"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+]
+
 dependencies = [
-    "langchain_openai",
-    "mcp-use",
     "mcp>=1.0.0",
     "pandas>=2.0.0",
     "numpy>=1.24.0",
@@ -22,8 +34,19 @@ dependencies = [
     "pydantic>=2.0.0",
 ]
 
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.0.0",
+    "pytest-asyncio>=0.23.0",
+]
+
 [project.scripts]
 time-series-mcp = "time_series_mcp.server:main"
+
+[project.urls]
+Homepage = "https://github.com/yourusername/time-series-mcp"
+Repository = "https://github.com/yourusername/time-series-mcp"
+Issues = "https://github.com/yourusername/time-series-mcp/issues"
 
 [build-system]
 requires = ["hatchling"]
