@@ -12,8 +12,9 @@ from mcp_use import MCPAgent, MCPClient
 
 
 async def main():
-    # Load environment variables
-    load_dotenv()
+    # Load environment variables from .env file (override=True ensures .env takes precedence)
+    load_dotenv(override=True)
+    print("📁 Loaded environment variables from .env file")
 
     # Load MCP server config (path relative to this script)
     script_dir = Path(__file__).parent

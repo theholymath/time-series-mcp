@@ -59,8 +59,9 @@ async def test_longley_forecast():
     """
     Test the MCP time series forecasting tools with the Longley dataset.
     """
-    # Load environment variables
-    load_dotenv()
+    # Load environment variables from .env file (override=True ensures .env takes precedence)
+    load_dotenv(override=True)
+    print("📁 Loaded environment variables from .env file")
 
     # Check for OpenAI API key
     if not os.getenv("OPENAI_API_KEY"):
