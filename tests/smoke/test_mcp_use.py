@@ -14,8 +14,9 @@ async def main():
     # Load environment variables
     load_dotenv()
 
-    # Load MCP server config
-    config_path = "../../config/time_series_mcp_config.json"
+    # Load MCP server config (path relative to this script)
+    script_dir = Path(__file__).parent
+    config_path = script_dir / "../../config/time_series_mcp_config.json"
     with open(config_path, 'r') as f:
         config = json.load(f)
 

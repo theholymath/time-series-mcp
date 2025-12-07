@@ -36,8 +36,9 @@ Our aim was to try to analyze the prices of these ride-sharing apps and try to f
     """
     print("📦 Checking Uber & Lyft dataset ...")
 
-    # Define the dataset path
-    df_path = Path("../../data/cab_weather/cab_rides.csv")
+    # Define the dataset path (relative to this script)
+    script_dir = Path(__file__).parent
+    df_path = script_dir / "../../data/cab_weather/cab_rides.csv"
 
     # Check if the dataset exists
     if not df_path.exists():
@@ -75,8 +76,9 @@ async def test_cab_ride_demand_forecast():
         print("❌ Test skipped: dataset not available")
         return
 
-    # Load MCP server config
-    config_path = "../../config/time_series_mcp_config.json"
+    # Load MCP server config (path relative to this script)
+    script_dir = Path(__file__).parent
+    config_path = script_dir / "../../config/time_series_mcp_config.json"
     with open(config_path, 'r') as f:
         config = json.load(f)
 
