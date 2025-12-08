@@ -4,7 +4,6 @@ Test time series forecasting using the Uber & Lyft cab ride dataset.
 This dataset contains ride price data from Boston in November 2018.
 """
 import os
-import json
 import asyncio
 from pathlib import Path
 import pandas as pd
@@ -77,11 +76,23 @@ async def test_cab_ride_demand_forecast():
         print("❌ Test skipped: dataset not available")
         return
 
-    # Load MCP server config (path relative to this script)
+    # Build MCP server config dynamically (using current project directory)
     script_dir = Path(__file__).parent
-    config_path = script_dir / "../../config/time_series_mcp_config.json"
-    with open(config_path, 'r') as f:
-        config = json.load(f)
+    project_root = (script_dir / "../..").resolve()
+
+    config = {
+        "mcpServers": {
+            "time-series-mcp": {
+                "command": "uv",
+                "args": [
+                    "--directory",
+                    str(project_root),
+                    "run",
+                    "time-series-mcp"
+                ]
+            }
+        }
+    }
 
     print("\n" + "="*70)
     print("🔧 Creating MCP Client and AI Agent...")

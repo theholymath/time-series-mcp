@@ -4,7 +4,6 @@ Test time series forecasting using the statsmodels Longley dataset.
 This dataset contains US macroeconomic data from 1947-1962.
 """
 import os
-import json
 import asyncio
 from pathlib import Path
 import pandas as pd
@@ -72,11 +71,23 @@ async def test_longley_forecast():
     # Prepare the dataset
     dataset_path = prepare_longley_dataset()
 
-    # Load MCP server config (path relative to this script)
+    # Build MCP server config dynamically (using current project directory)
     script_dir = Path(__file__).parent
-    config_path = script_dir / "../../config/time_series_mcp_config.json"
-    with open(config_path, 'r') as f:
-        config = json.load(f)
+    project_root = (script_dir / "../..").resolve()
+
+    config = {
+        "mcpServers": {
+            "time-series-mcp": {
+                "command": "uv",
+                "args": [
+                    "--directory",
+                    str(project_root),
+                    "run",
+                    "time-series-mcp"
+                ]
+            }
+        }
+    }
 
     print("\n" + "="*70)
     print("🔧 Creating MCP Client and AI Agent...")

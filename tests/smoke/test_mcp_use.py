@@ -3,7 +3,6 @@
 Test script to verify time-series-mcp server works with mcp-use framework.
 """
 import os
-import json
 import asyncio
 from pathlib import Path
 from dotenv import load_dotenv
@@ -16,13 +15,25 @@ async def main():
     load_dotenv(override=True)
     print("📁 Loaded environment variables from .env file")
 
-    # Load MCP server config (path relative to this script)
+    # Build MCP server config dynamically (using current project directory)
     script_dir = Path(__file__).parent
-    config_path = script_dir / "../../config/time_series_mcp_config.json"
-    with open(config_path, 'r') as f:
-        config = json.load(f)
+    project_root = (script_dir / "../..").resolve()
 
-    print("🔧 Creating MCP Client from config...")
+    config = {
+        "mcpServers": {
+            "time-series-mcp": {
+                "command": "uv",
+                "args": [
+                    "--directory",
+                    str(project_root),
+                    "run",
+                    "time-series-mcp"
+                ]
+            }
+        }
+    }
+
+    print(f"🔧 Creating MCP Client from config (project root: {project_root})...")
     # Create MCPClient from the config
     client = MCPClient.from_dict(config)
 
