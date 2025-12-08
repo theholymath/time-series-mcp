@@ -1,10 +1,13 @@
 {
-  "name": "time-series-mcp",
-  "command": "uv",
-  "args": [
-    "--directory",
-    "/home/user/time-series-mcp",
-    "run",
-    "time-series-mcp"
-  ]
+  "mcpServers": {
+    "time-series-mcp": {
+      "command": "uv",
+      "args": [
+        "--directory",
+        "/home/user/time-series-mcp",
+        "run",
+        "time-series-mcp"
+      ]
+    }
+  }
 }
