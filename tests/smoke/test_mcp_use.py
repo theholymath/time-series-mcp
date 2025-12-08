@@ -5,17 +5,20 @@ Test script to verify time-series-mcp server works with mcp-use framework.
 import os
 import json
 import asyncio
+from pathlib import Path
 from dotenv import load_dotenv
 from langchain_openai import ChatOpenAI
 from mcp_use import MCPAgent, MCPClient
 
 
 async def main():
-    # Load environment variables
-    load_dotenv()
+    # Load environment variables from .env file (override=True ensures .env takes precedence)
+    load_dotenv(override=True)
+    print("📁 Loaded environment variables from .env file")
 
-    # Load MCP server config
-    config_path = "config/time_series_mcp_config.json"
+    # Load MCP server config (path relative to this script)
+    script_dir = Path(__file__).parent
+    config_path = script_dir / "../../config/time_series_mcp_config.json"
     with open(config_path, 'r') as f:
         config = json.load(f)
 
@@ -29,6 +32,9 @@ async def main():
         print("⚠️  OPENAI_API_KEY not found in environment.")
         print("Please set it in .env file to test with AI agent.")
         return
+
+    api_key = os.getenv("OPENAI_API_KEY")
+    print(f"🔑 Using API key: {api_key[:5]}...{api_key[-5:]}")
 
     llm = ChatOpenAI(model="gpt-4o-mini", temperature=0)
 

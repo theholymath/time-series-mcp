@@ -42,9 +42,10 @@ def prepare_longley_dataset():
     # Data is from 1947-1962 (16 years)
     df['YEAR'] = range(1947, 1947 + len(df))
 
-    # Save to CSV for the MCP server
-    output_path = Path("data/longley_employment.csv")
-    output_path.parent.mkdir(exist_ok=True)
+    # Save to CSV for the MCP server (path relative to this script)
+    script_dir = Path(__file__).parent
+    output_path = script_dir / "../../data/longley_employment.csv"
+    output_path.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(output_path, index=False)
 
     print(f"\n💾 Saved dataset to: {output_path}")
@@ -58,8 +59,9 @@ async def test_longley_forecast():
     """
     Test the MCP time series forecasting tools with the Longley dataset.
     """
-    # Load environment variables
-    load_dotenv()
+    # Load environment variables from .env file (override=True ensures .env takes precedence)
+    load_dotenv(override=True)
+    print("📁 Loaded environment variables from .env file")
 
     # Check for OpenAI API key
     if not os.getenv("OPENAI_API_KEY"):
@@ -70,8 +72,9 @@ async def test_longley_forecast():
     # Prepare the dataset
     dataset_path = prepare_longley_dataset()
 
-    # Load MCP server config
-    config_path = "config/time_series_mcp_config.json"
+    # Load MCP server config (path relative to this script)
+    script_dir = Path(__file__).parent
+    config_path = script_dir / "../../config/time_series_mcp_config.json"
     with open(config_path, 'r') as f:
         config = json.load(f)
 
@@ -81,6 +84,10 @@ async def test_longley_forecast():
 
     # Create MCPClient from the config
     client = MCPClient.from_dict(config)
+
+    # Verify API key
+    api_key = os.getenv("OPENAI_API_KEY")
+    print(f"🔑 Using API key: {api_key[:5]}...{api_key[-5:]}")
 
     # Create LLM - using gpt-4o for better performance
     llm = ChatOpenAI(model="gpt-4o", temperature=0)

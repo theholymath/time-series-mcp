@@ -39,6 +39,11 @@ dev = [
     "pytest>=8.0.0",
     "pytest-asyncio>=0.23.0",
 ]
+smoke = [
+    "mcp-use>=0.1.0",
+    "langchain-openai>=0.1.0",
+    "python-dotenv>=1.0.0",
+]
 
 [project.scripts]
 time-series-mcp = "time_series_mcp.server:main"
