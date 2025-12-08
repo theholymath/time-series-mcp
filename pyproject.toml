@@ -1,59 +1,13 @@
 [project]
-name = "time-series-mcp"
+name = "time-series-mcp-v2"
 version = "0.1.0"
-description = "MCP server for time series analysis and forecasting"
+description = "Add your description here"
 readme = "README.md"
-requires-python = ">=3.11"
-license = {text = "MIT"}
-authors = [
-    {name = "Your Name", email = "your.email@example.com"}
-]
-keywords = ["mcp", "time-series", "forecasting", "claude", "ai"]
-classifiers = [
-    "Development Status :: 3 - Alpha",
-    "Intended Audience :: Developers",
-    "License :: OSI Approved :: MIT License",
-    "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.11",
-    "Programming Language :: Python :: 3.12",
-]
-
+requires-python = ">=3.14"
 dependencies = [
-    "mcp>=1.0.0",
-    "pandas>=2.0.0",
-    "numpy>=1.24.0",
-    "scikit-learn>=1.3.0",
-    "statsmodels>=0.14.0",
-    "prophet>=1.1.4",
-    "matplotlib>=3.7.0",
-    "seaborn>=0.12.0",
-    "plotly>=5.15.0",
-    "pmdarima>=2.0.0",
-    "torch>=2.0.0",
-    "holidays>=0.25",
-    "pydantic>=2.0.0",
+    "mcp[cli]>=1.23.2",
+    "pandas>=2.3.3",
+    "scipy>=1.16.3",
+    "statsmodels>=0.14.6",
+    "tabulate>=0.9.0",
 ]
-
-[project.optional-dependencies]
-dev = [
-    "pytest>=8.0.0",
-    "pytest-asyncio>=0.23.0",
-]
-smoke = [
-    "mcp-use>=0.1.0",
-    "langchain-openai>=0.1.0",
-    "python-dotenv>=1.0.0",
-]
-
-[project.scripts]
-time-series-mcp = "time_series_mcp.server:main"
-
-[project.urls]
-Homepage = "https://github.com/yourusername/time-series-mcp"
-Repository = "https://github.com/yourusername/time-series-mcp"
-Issues = "https://github.com/yourusername/time-series-mcp/issues"
-
-[build-system]
-requires = ["hatchling"]
-build-backend = "hatchling.build"
-
