@@ -10,10 +10,14 @@ warnings.simplefilter('ignore', ConvergenceWarning)
 from typing import Optional
 from mcp.server.fastmcp import FastMCP
 import pandas as pd
+import matplotlib.pyplot as plt
 import io
+import os
 
 mcp = FastMCP("TimeSeriesMCP")
-
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+OUTPUT_DIR = os.path.join(BASE_DIR, "forecast_plots")
+os.makedirs(OUTPUT_DIR, exist_ok=True)
 # key: dataset_name, value: pandas DF
 DATA_STORE = {}
 
@@ -161,17 +165,18 @@ def decompose_series(dataset_name: str, target_column: str, period: int = 1) -> 
         return f"Error running decomposition: {str(e)}. Did you specify the correct 'period'?"
 
 @mcp.tool()
-def run_arima_forecast(dataset_name: str, target_column: str, p: int, d: int, q: int, steps: int = 5) -> str:
+def run_sarima_forecast(dataset_name: str, target_column: str, p: int, d: int, q: int, 
+                        P:int = 0, D: int = 0, Q: int = 0, s: int = 0, steps: int = 5) -> str:
     """
-    Fit an ARIMA(p,d,q) model and forecast future values.
+    Fit a SARIMA(p,d,q)(P,D,Q)[s] model and forecast.
     
     Args:
         dataset_name: Name of the dataset.
-        target_column: The value column to forecast.
-        p: AR order (lag observations).
-        d: I order (differencing).
-        q: MA order (moving average).
-        steps: Number of future steps to forecast.
+        target_column: The value column.
+        p, d, q: Non-seasonal order.
+        P, D, Q: Seasonal order (default 0).
+        s: Seasonal periodicity (e.g., 12 for monthly). Default 0 (no seasonality).
+        steps: Future steps to forecast.
     """
     if dataset_name not in DATA_STORE:
         return f"Error: Dataset '{dataset_name}' not found."
@@ -180,46 +185,59 @@ def run_arima_forecast(dataset_name: str, target_column: str, p: int, d: int, q:
     series = df[target_column].dropna()
     
     try:
+        # Construct seasonal order tuple
+        seasonal_order = (P, D, Q, s) if s > 0 else None
+        
         # Fit Model
-        model = ARIMA(series, order=(p, d, q))
+        model = ARIMA(series, order=(p, d, q), seasonal_order=seasonal_order)
         model_fit = model.fit()
         
         # Forecast
         forecast = model_fit.forecast(steps=steps)
         
+        # --- NEW: Generate Plot ---
+        # Create a proper index for the forecast for plotting
+        last_idx = series.index[-1]
+        if isinstance(last_idx, (int, float)):
+            forecast_idx = range(int(last_idx) + 1, int(last_idx) + 1 + steps)
+        else:
+            # Fallback for non-numeric index: just use steps 1..N
+            forecast_idx = range(len(series), len(series) + steps)
+            
+        forecast_series = pd.Series(forecast.values, index=forecast_idx)
+        
+        plot_path = _save_forecast_plot(
+            dataset_name, 
+            series, 
+            forecast_series, 
+            f"SARIMA({p},{d},{q})x({P},{D},{Q},{s})"
+        )
+        
+        # Output Construction
         output = []
-        output.append(f"=== ARIMA({p},{d},{q}) Forecast Results ===")
-        output.append(f"AIC Score: {model_fit.aic:.2f} (Lower is better)")
+        output.append(f"=== SARIMA Forecast Results ===")
+        output.append(f"AIC: {model_fit.aic:.2f}")
+        output.append(f"Plot Saved To: {plot_path}")  # <--- Tell the user where it is
         output.append("\nForecasted Values:")
         
-        # Create a simple table for the forecast
         forecast_df = pd.DataFrame({'Step': range(1, steps + 1), 'Forecast': forecast.values})
         output.append(forecast_df.to_markdown(index=False))
         
         return "\n".join(output)
         
     except Exception as e:
-        return f"Error fitting ARIMA model: {str(e)}"
-
+        return f"Error fitting SARIMA model: {str(e)}"
 @mcp.tool()
 def run_exponential_smoothing_forecast(
     dataset_name: str, 
     target_column: str, 
-    trend: Optional[str] = 'add',           # Explicitly allow None
-    seasonal: Optional[str] = None,         # Explicitly allow None
-    seasonal_periods: Optional[int] = None, # Explicitly allow None
+    trend: Optional[str] = 'add', 
+    seasonal: Optional[str] = None, 
+    seasonal_periods: Optional[int] = None, 
     steps: int = 5
 ) -> str:
     """
     Fit a Holt-Winters Exponential Smoothing model.
-    
-    Args:
-        dataset_name: Name of the dataset.
-        target_column: The value column.
-        trend: 'add', 'mul', or None.
-        seasonal: 'add', 'mul', or None.
-        seasonal_periods: The number of periods in a season (e.g., 12 for monthly). Required if seasonal is set.
-        steps: Number of future steps to forecast.
     """
     if dataset_name not in DATA_STORE:
         return f"Error: Dataset '{dataset_name}' not found."
@@ -227,19 +245,13 @@ def run_exponential_smoothing_forecast(
     df = DATA_STORE[dataset_name]
     series = df[target_column].dropna()
     
-    # Clean inputs: Ensure string "None" or empty strings become Python None
-    if isinstance(trend, str) and trend.lower() in ['none', 'null', '']:
-        trend = None
-    
-    if isinstance(seasonal, str) and seasonal.lower() in ['none', 'null', '']:
-        seasonal = None
-        
-    # Validation: If seasonal is used, periods must be provided
+    # Input cleaning (same as before)
+    if isinstance(trend, str) and trend.lower() in ['none', 'null', '']: trend = None
+    if isinstance(seasonal, str) and seasonal.lower() in ['none', 'null', '']: seasonal = None
     if seasonal is not None and seasonal_periods is None:
-        return "Error: You must provide 'seasonal_periods' (e.g., 12) when using seasonality."
+        return "Error: You must provide 'seasonal_periods' when using seasonality."
 
     try:
-        # Fit Model
         model = ExponentialSmoothing(
             series, 
             trend=trend, 
@@ -247,13 +259,24 @@ def run_exponential_smoothing_forecast(
             seasonal_periods=seasonal_periods
         )
         model_fit = model.fit()
-        
-        # Forecast
         forecast = model_fit.forecast(steps=steps)
+        
+        # --- NEW: Generate Plot ---
+        # Simple index handling
+        last_idx = len(series)
+        forecast_idx = range(last_idx, last_idx + steps)
+        forecast_series = pd.Series(forecast.values, index=forecast_idx)
+        
+        plot_path = _save_forecast_plot(
+            dataset_name, 
+            series, 
+            forecast_series, 
+            f"ETS(trend={trend}, seasonal={seasonal})"
+        )
         
         output = []
         output.append(f"=== Exponential Smoothing Forecast ===")
-        output.append(f"Params: Trend={trend}, Seasonal={seasonal}, Periods={seasonal_periods}")
+        output.append(f"Plot Saved To: {plot_path}") # <--- Tell the user
         output.append("\nForecasted Values:")
         
         forecast_df = pd.DataFrame({'Step': range(1, steps + 1), 'Forecast': forecast.values})
@@ -263,6 +286,38 @@ def run_exponential_smoothing_forecast(
         
     except Exception as e:
         return f"Error fitting Exponential Smoothing: {str(e)}"
+
+def _save_forecast_plot(
+    dataset_name: str, 
+    history: pd.Series, 
+    forecast: pd.Series, 
+    title: str
+) -> str:
+    """
+    Internal helper to plot history + forecast and save to disk.
+    Returns the absolute path of the saved file.
+    """
+    plt.figure(figsize=(10, 6))
     
+    # Plot last 50 points of history context (to keep plot readable)
+    history_tail = history.tail(50)
+    plt.plot(history_tail.index, history_tail.values, label='History (Last 50)', color='blue')
+    
+    # Plot Forecast
+    # Create a continuous index for plotting if possible, else just append
+    plt.plot(forecast.index, forecast.values, label='Forecast', color='red', linestyle='--')
+    
+    plt.title(f"{title} - {dataset_name}")
+    plt.legend()
+    plt.grid(True, alpha=0.3)
+    
+    # Save file
+    filename = f"{dataset_name}_{title.replace(' ', '_')}.png"
+    filepath = os.path.abspath(os.path.join(OUTPUT_DIR, filename))
+    plt.savefig(filepath)
+    plt.close()
+    
+    return filepath
+
 if __name__ == "__main__":
     mcp.run()
