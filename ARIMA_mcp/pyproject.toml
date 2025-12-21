@@ -1,0 +1,17 @@
+[project]
+name = "arima_mcp"
+version = "0.1.0"
+description = "ARIMA-based time series analysis MCP server"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "mcp[cli]>=1.23.2",
+    "pandas>=2.3.3",
+    "scipy>=1.16.3",
+    "statsmodels>=0.14.6",
+    "tabulate>=0.9.0",
+    "data_models",
+]
+
+[tool.uv.sources]
+data_models = { workspace = true }

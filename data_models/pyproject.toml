@@ -1,0 +1,13 @@
+[project]
+name = "data_models"
+version = "0.1.0"
+description = "Shared data models and utilities for MCP servers"
+requires-python = ">=3.12"
+dependencies = [
+    "pydantic>=2.0.0",
+    "numpy>=1.26.0",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"

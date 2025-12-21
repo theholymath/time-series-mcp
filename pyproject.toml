@@ -1,14 +1,6 @@
-[project]
-name = "time-series-mcp-v2"
-version = "0.1.0"
-description = "Add your description here"
-readme = "README.md"
-requires-python = ">=3.14"
-dependencies = [
-    "matplotlib>=3.10.7",
-    "mcp[cli]>=1.23.2",
-    "pandas>=2.3.3",
-    "scipy>=1.16.3",
-    "statsmodels>=0.14.6",
-    "tabulate>=0.9.0",
-]
+[tool.uv.workspace]
+members = ["ARIMA_mcp", "data_analysis_mcp", "hello_world_mcp", "data_models"]
+
+[tool.uv]
+# Shared UV configuration for all workspace members
+default-groups = []
